@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar dataLayer para GTM
+    window.dataLayer = window.dataLayer || [];
+    
     // Add smooth scrolling for all links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -90,29 +93,54 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
         }, 3000);
         
-        // Track clicks with Facebook Pixel
+        // Rastrear cliques nos botões e enviar dados para o n8n antes de redirecionar
         button.addEventListener('click', function(e) {
-            // Track click event in Facebook Pixel
+            e.preventDefault(); // Prevenir o comportamento padrão do link
+            
+            // URL de destino do Telegram
+            const telegramUrl = this.getAttribute('href');
+            
+            // Rastrear evento de clique no Facebook Pixel (Lead)
             if (typeof fbq === 'function') {
                 fbq('track', 'Lead', {
-                    content_name: 'Telegram Group Button Click',
-                    content_category: 'Conversion'
+                    content_name: 'Marcelo Kalica - Grupo de Lives',
+                    content_category: 'Telegram Subscription'
                 });
             }
             
-            // Track outbound link to Telegram
-            if (typeof fbq === 'function') {
-                // Delay navigation slightly to ensure pixel fires
-                e.preventDefault();
-                const href = this.getAttribute('href');
-                
-                fbq('trackCustom', 'TelegramRedirect', {
-                    destination: href
+            // Obter o parâmetro fbclid da URL
+            const fbclid = getUrlParameter('fbclid');
+            
+            // Dados para enviar ao n8n
+            const data = {
+                expert: 'marcelokalica',
+                fbclid: fbclid
+            };
+            
+            // Endpoint do n8n
+            const n8nEndpoint = 'https://whkn8n.meumenu2023.uk/webhook/fbclid-landingpage';
+            
+            // Enviar dados para o n8n via POST apenas se houver fbclid
+            if (fbclid) {
+                fetch(n8nEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                    mode: 'no-cors'
+                })
+                .then(response => {
+                    // Redirecionar para o Telegram após o envio dos dados
+                    window.location.href = telegramUrl;
+                })
+                .catch(error => {
+                    // Em caso de erro, redirecionar mesmo assim
+                    window.location.href = telegramUrl;
                 });
-                
-                setTimeout(function() {
-                    window.open(href, '_blank');
-                }, 300);
+            } else {
+                // Se não houver fbclid, apenas redirecionar para o Telegram
+                window.location.href = telegramUrl;
             }
         });
     });
@@ -140,25 +168,31 @@ document.addEventListener('DOMContentLoaded', function() {
         touchElements.forEach(element => {
             element.addEventListener('touchstart', function() {
                 this.classList.add('touch-active');
-            });
+            }, { passive: true });
             
             element.addEventListener('touchend', function() {
                 this.classList.remove('touch-active');
-            });
+            }, { passive: true });
         });
     }
-    
-    // Add particle effect to background
-    createParticles();
 });
+
+// Função para obter parâmetros da URL
+function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    const results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+}
 
 // Create particle effect
 function createParticles() {
     const particleContainer = document.createElement('div');
-    particleContainer.className = 'particles';
+    particleContainer.className = 'particle-container';
     document.body.appendChild(particleContainer);
     
-    for (let i = 0; i < 30; i++) {
+    // Create particles
+    for (let i = 0; i < 50; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
         
@@ -167,61 +201,54 @@ function createParticles() {
         const posY = Math.random() * 100;
         
         // Random size
-        const size = Math.random() * 5 + 1;
+        const size = Math.random() * 5 + 2;
         
         // Random opacity
-        const opacity = Math.random() * 0.5 + 0.1;
+        const opacity = Math.random() * 0.5 + 0.3;
         
         // Random animation duration
         const duration = Math.random() * 20 + 10;
         
-        // Random delay
-        const delay = Math.random() * 10;
-        
-        // Apply styles
+        // Set styles
         particle.style.left = `${posX}%`;
         particle.style.top = `${posY}%`;
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         particle.style.opacity = opacity;
-        particle.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+        particle.style.animation = `float ${duration}s linear infinite`;
         
         particleContainer.appendChild(particle);
     }
 }
+
+// Create particle effect
+createParticles();
 
 // Add CSS for animations
 document.head.insertAdjacentHTML('beforeend', `
 <style>
 @keyframes pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(0, 136, 204, 0.7);
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
     }
     70% {
-        box-shadow: 0 0 0 15px rgba(0, 136, 204, 0);
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(0, 136, 204, 0);
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
     }
 }
 
 @keyframes float {
-    0% {
-        transform: translateY(0px);
+    0%, 100% {
+        transform: translateY(0);
     }
     50% {
         transform: translateY(-10px);
     }
-    100% {
-        transform: translateY(0px);
-    }
 }
 
-.pulse {
-    animation: pulse 1s ease-in-out;
-}
-
-.particles {
+.particle-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -233,8 +260,14 @@ document.head.insertAdjacentHTML('beforeend', `
 
 .particle {
     position: absolute;
-    background-color: rgba(0, 136, 204, 0.3);
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
+    pointer-events: none;
+}
+
+.touch-active {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
 }
 </style>
 `);
