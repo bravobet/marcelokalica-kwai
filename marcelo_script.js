@@ -100,14 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // URL de destino do Telegram
             const telegramUrl = this.getAttribute('href');
             
-            // Rastrear evento de clique no Facebook Pixel (Lead)
-            if (typeof fbq === 'function') {
-                fbq('track', 'Lead', {
-                    content_name: 'Marcelo Kalica - Grupo de Lives',
-                    content_category: 'Telegram Subscription'
-                });
-            }
-            
             // Obter todos os parâmetros da URL de uma vez
             const params = getAllUrlParameters();
             
