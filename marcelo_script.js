@@ -100,6 +100,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // URL de destino do Telegram
             const telegramUrl = this.getAttribute('href');
             
+            // Rastrear clique com Kwai Pixel
+            if (typeof kwaiq !== 'undefined') {
+                console.log('Enviando evento de clique para Kwai Pixel');
+                kwaiq.track('click', {
+                    button_id: this.id || 'telegram-button',
+                    button_text: this.innerText.trim()
+                });
+            }
+            
             // Obter todos os parâmetros da URL de uma vez
             const params = getAllUrlParameters();
             
