@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar dataLayer para GTM
-    window.dataLayer = window.dataLayer || [];
+    // dataLayer para GTM removido
     
     // Add smooth scrolling for all links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
